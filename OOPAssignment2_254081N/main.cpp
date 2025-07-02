@@ -26,22 +26,35 @@ int main() {
   
        
         Game::GameState state = Game::GameState::Running;
-
         while (state == Game::GameState::Running) {
+//#ifdef _WIN32
+//            system("cls");
+//#else
+//            system("clear");
+//#endif
+          
+            cout << "Controls: W A S D to move. Try to eat all ghosts!\n";
             game.drawWorld();
-           
+
             cout << "enter WASD): ";
             cin >> command;
-           
+            
             if (command == 'q') {
                 cout << "quitting game.\n";
                 break;
-
-        
-                /*     std::this_thread::sleep_for(std::chrono::milliseconds(200));*/
             }
-           state =game.doTurn(command);
+                state = game.doTurn(command);
+
+
+         /*   }
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));*/
+            cout << "Status: " << game.getMessage() << "\n";
+           
+            
+
+            
         }
+      
             cout << "Game over! Press any key to exit...";
             _getch();
 

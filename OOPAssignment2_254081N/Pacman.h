@@ -11,7 +11,7 @@ public:
     void setSuper(bool val);
     bool getSuper() const;
 
-    void update() ;   // move based on keyboard input
+    bool update() ;   // move based on keyboard input
     void draw() ;     // draw the Pacman symbol
 
     int getX() const;

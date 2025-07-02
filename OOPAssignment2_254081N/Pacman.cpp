@@ -2,6 +2,8 @@
 #include "Pacman.h"
 #include <conio.h>  // Windows only
 #include <iostream>
+#include <algorithm>
+
 
 Pacman::Pacman(int startX, int startY)
     : x(startX), y(startY), boardWidth(10), boardHeight(10), symbol('P') {
@@ -33,9 +35,31 @@ void Pacman::handleInput() {
 }
 
 
-void Pacman::update() {
-    handleInput();
+
+bool Pacman::update() {
+    int oldX = x;
+    int oldY = y;
+
+    if (_kbhit()) {
+        char ch = _getch();
+        std::cout << "Key pressed: " << ch << std::endl;
+        switch (ch) {
+        case 'w': y = std::max(0, y - 1); break;
+        case 's': y = std::min(boardHeight - 1, y + 1); break;
+        case 'a': x = std::max(0, x - 1); break;
+        case 'd': x = std::min(boardWidth - 1, x + 1); break;
+        default: break;
+        }
+    }
+
+    if (x != oldX || y != oldY) {
+        std::cout << "Pacman moved to (" << x << ", " << y << ")\n";
+        return true;
+    }
+
+    return false;
 }
+
 void Pacman::move(char command) {
     int newX = x;
     int newY = y;

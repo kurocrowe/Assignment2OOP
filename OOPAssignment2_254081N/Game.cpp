@@ -2,6 +2,7 @@
 #include "Pacman.h"
 #include "Ghost.h"
 #include "Berry.h"
+
 #include <windows.h>
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
@@ -9,7 +10,7 @@
 #include <iostream>
 using namespace std;
 
-Game::Game(int size) : s(size) {
+Game::Game(int size) : s(size), message("") {
     for (int i = 0; i < MAX_OBJECTS; ++i) {
         gameObjects[i] = nullptr;
     }
@@ -31,19 +32,21 @@ void Game::initGame() {
     // Create Berry
     gameObjects[1] = new Berry();
 
-    // Create multiple ghosts
+    // Create ghosts
     gameObjects[2] = new Ghost(5, 5);
     gameObjects[3] = new Ghost(10, 8);
-	gameObjects[4] = new Berry(15, 15); // Optional: another Berry for variety
+    gameObjects[4] = new Berry(15, 15); // Optional berry for variety
+
     // Set board size for ghosts
     for (int i = 2; i <= 3; ++i) {
         Ghost* ghost = dynamic_cast<Ghost*>(gameObjects[i]);
         if (ghost) ghost->setBoardSize(s, s);
     }
+
+    setMessage("Game started! Eat berries and ghosts!");
 }
 
 void Game::drawWorld() {
-   
     cout << "+";
     for (int i = 0; i < s * 2; ++i) cout << "-";
     cout << "+\n";
@@ -74,7 +77,6 @@ void Game::drawWorld() {
                 symbol = g->getSymbol();
             }
             else if (Berry* b = dynamic_cast<Berry*>(gameObjects[i])) {
-               
                 x = b->getX();
                 y = b->getY();
                 symbol = b->getSymbol();
@@ -107,15 +109,16 @@ void Game::drawWorld() {
 
 Game::GameState Game::doTurn(char command) {
     Pacman* pacman = dynamic_cast<Pacman*>(gameObjects[0]);
-  
     Berry* berry = dynamic_cast<Berry*>(gameObjects[1]);
 
+    bool pacmanMoved = false;
+
     if (pacman) {
-        pacman->move(command);
-        PlaySound(TEXT("chomp.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+       pacman->move(command);  // returns true if moved
+            PlaySound(TEXT("chomp.wav"), NULL, SND_FILENAME | SND_ASYNC);
     }
 
-    // Ghost movement
+    // Move ghosts
     for (int i = 2; i < MAX_OBJECTS; ++i) {
         Ghost* ghost = dynamic_cast<Ghost*>(gameObjects[i]);
         if (ghost) {
@@ -126,45 +129,51 @@ Game::GameState Game::doTurn(char command) {
     // Pacman eats Berry
     if (pacman && berry) {
         if (pacman->getX() == berry->getX() && pacman->getY() == berry->getY()) {
+            PlaySound(NULL, NULL, 0); // Stop other sounds
             pacman->setSuper(true);
             delete gameObjects[1];
             gameObjects[1] = nullptr;
-            PlaySound(NULL, NULL, 0);
-            PlaySound(TEXT("eatfruit.wav"), NULL, SND_FILENAME | SND_ASYNC); // 🎵 power up sound
-            cout << "Pacman ate Berry and is now SUPER!\n";
+
+            PlaySound(TEXT("eatfruit.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            setMessage("Pacman ate Berry and is now SUPER!");
         }
     }
-
-    // Collision with Ghost
+    if (pacman && pacman->getSuper()) {
+        turn++;
+        cout << "Turn: "<< turn<<endl;
+        if (turn >= 4) {
+            pacman->setSuper(false);
+            turn = 0;  // reset counter
+            setMessage("Pacman is back to normal.");
+        }
+    }
+    // Pacman vs Ghosts
     for (int i = 2; i < MAX_OBJECTS; ++i) {
         Ghost* ghost = dynamic_cast<Ghost*>(gameObjects[i]);
         if (ghost && pacman) {
             if (pacman->getX() == ghost->getX() && pacman->getY() == ghost->getY()) {
-                PlaySound(NULL, NULL, 0);  // Stop chomp sound
+                PlaySound(NULL, NULL, 0);  // Stop current sound
 
                 if (pacman->getSuper()) {
                     delete gameObjects[i];
                     gameObjects[i] = nullptr;
 
                     PlaySound(TEXT("eatghost.wav"), NULL, SND_FILENAME | SND_ASYNC);
-                    cout << "Pacman ate a Ghost!\n";
-                   
+                    setMessage("Pacman ate a Ghost!");
                 }
                 else {
                     PlaySound(TEXT("death.wav"), NULL, SND_FILENAME | SND_ASYNC);
-                    cout << "Pacman was caught by a Ghost! Game Over.\n";
+                    setMessage("Pacman was caught by a Ghost! Game Over.");
                     return GameState::Lost;
                 }
-
             }
         }
     }
- 
 
-    if (gameObjects[2]==nullptr&&gameObjects[3] == nullptr) {
-        cout << "All ghosts eaten! You win!\n";
+    if (gameObjects[2] == nullptr && gameObjects[3] == nullptr) {
+        setMessage("All ghosts eaten! You win!");
         return GameState::Won;
     }
-    
+
     return GameState::Running;
 }
