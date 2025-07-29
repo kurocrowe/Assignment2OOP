@@ -110,7 +110,8 @@ void Game::drawWorld() {
 Game::GameState Game::doTurn(char command) {
     Pacman* pacman = dynamic_cast<Pacman*>(gameObjects[0]);
     Berry* berry = dynamic_cast<Berry*>(gameObjects[1]);
-
+    int pacmanX = pacman->getX();
+	int pacmanY = pacman->getY();
     bool pacmanMoved = false;
 
     if (pacman) {
@@ -119,11 +120,8 @@ Game::GameState Game::doTurn(char command) {
     }
 
     // Move ghosts
-    for (int i = 2; i < MAX_OBJECTS; ++i) {
-        Ghost* ghost = dynamic_cast<Ghost*>(gameObjects[i]);
-        if (ghost) {
-            ghost->update();
-        }
+    for (int i = 2; i < 4; ++i) {
+		gameObjects[i]->update(pacmanX, pacmanY);
     }
 
     // Pacman eats Berry

@@ -8,7 +8,7 @@ public:
     Ghost(int startX = 0, int startY = 0);
     virtual ~Ghost() {}
 
-    void update();    // move the ghost randomly
+    void update(int pacmanX, int pacmanY)override;  // move the ghost randomly
     void draw();      // draw the ghost symbol
 
     int getX() const;

@@ -16,21 +16,27 @@ void Ghost::setBoardSize(int width, int height) {
     boardHeight = height;
 }
 
-void Ghost::update() {
+void Ghost::update(int pacmanX, int pacmanY) {
     int oldX = x;
     int oldY = y;
 
-    int dir = rand() % 4;
-    switch (dir) {
-    case 0: if (x > 0) x--; break;               // move left
-    case 1: if (x < boardWidth - 1) x++; break; // move right
-    case 2: if (y > 0) y--; break;               // move up
-    case 3: if (y < boardHeight - 1) y++; break;// move down
+    // Simple logic: move horizontally if not aligned, else move vertically
+    if (x < pacmanX && x < boardWidth - 1) {
+        x++; // move right
+    }
+    else if (x > pacmanX && x > 0) {
+        x--; // move left
+    }
+    else if (y < pacmanY && y < boardHeight - 1) {
+        y++; // move down
+    }
+    else if (y > pacmanY && y > 0) {
+        y--; // move up
     }
 
-  
     std::cout << "Ghost moved from (" << oldX << ", " << oldY << ") to (" << x << ", " << y << ")\n";
 }
+
 
 void Ghost::draw() {
     std::cout << symbol;

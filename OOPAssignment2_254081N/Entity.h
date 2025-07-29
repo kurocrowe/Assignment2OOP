@@ -7,5 +7,6 @@ public:
     Entity* gameObjects[MAX_OBJECTS];
      Entity();
     virtual ~Entity();
+    virtual void update(int pacmanX, int pacmanY) {}
 };
 
